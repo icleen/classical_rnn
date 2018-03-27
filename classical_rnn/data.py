@@ -43,6 +43,40 @@ def randomTrainingPair():
 def randomChoice(l):
     return l[random.randint(0, len(l) - 1)]
 
+
+def combine_tracks(filename):
+    file = open(filename, 'r')
+
+    data = file.read()
+    name = file.name
+    newName = name[:name.rfind('.')] + "_combined" + name[name.rfind('.'):]
+    file.close()
+
+    jsonData = json.loads(data)
+
+    # combines all tracks from entire json
+    tracks = jsonData['tracks']
+    combined = tracks[0]
+    for track in tracks[1:]:
+        if track['duration'] > combined['duration']:
+            combined['duration'] = track['duration']
+        if track['id'] > combined['id']:
+            combined['id'] = track['id'] + 1
+        for note in track['notes']:
+            combined['notes'].append(note)
+        combined['length'] = len(combined['notes'])
+
+    print combined
+
+    # combined is now a single track containing all notes.
+    # This should work with fugue tracks too.
+    # This will probably break if we try to include instrumentation later
+    # jsonWrite = json.dumps(combined, indent=4)
+    # newFile = open(newName, 'w')
+    # newFile.write(jsonWrite)
+    # newFile.close()
+
+
 artist_tracks = get_hotones('../midi_data/train')
 all_artists = [key for key in artist_tracks]
 
@@ -50,4 +84,7 @@ if __name__ == "__main__":
     # midi_folder = sys.argv[1]
     # artist_tracks = get_hotones('midi_data')
     # all_artists = [key for key in artist_tracks]
-    artist, track, artist_tensor, track_tensor = randomTrainingPair()
+    # artist, track, artist_tensor, track_tensor = randomTrainingPair()
+    for file in os.listdir('../BaroqueJSON'):
+        if '.js' in file:
+            combine_tracks(os.path.join('../BaroqueJSON', file))
