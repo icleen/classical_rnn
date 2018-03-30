@@ -12,79 +12,57 @@ note_range = 95
 def get_notes(midi_file):
     with open(midi_file, 'r') as f:
         midi = json.load(f)
-    notes = midi['tracks'][1]['notes']
-    mnotes = np.asarray([int(note['midi']) for note in notes])
-    mnotes -= 24
-    tensor = torch.zeros(note_num, 1, note_range)
-    for ni in range(note_num):
-        tensor[ni][0][mnotes[ni]] = 1
+
+    times = {}
+    for track in midi['tracks']:
+        if len(track['notes']) > 1:
+            notes = track['notes']
+            for note in notes:
+                if note['time'] not in note:
+                    times[note['time']] = torch.zeros(note_range)
+                times[note['time']][int(note['midi'])-24] += 1
+
+    keylist = times.keys()
+    keylist.sort()
+    tensor = torch.zeros(len(keylist), 1, note_range)
+    # tensor = np.zeros((len(keylist), 1, note_range))
+    for ki, key in enumerate(keylist):
+        tensor[ki][0] += times[key]
     return tensor
 
 def get_hotones(folder):
-    artists = {}
+    # print folder
+    songs = []
     for file in os.listdir(folder):
-        if '.js' in file:
-            artist = file.split('_')[0]
-            if artist not in artists:
-                artists[artist] = []
-
-            track = get_notes(os.path.join(folder,file))
-            artists[artist].append(track)
-
-    return artists
+        if '.json' in file:
+            songs.append( get_notes(os.path.join(folder,file)) )
+    return songs
 
 def randomTrainingPair():
-    artist = randomChoice(all_artists)
-    track = randomChoice(artist_tracks[artist])
-    artist_tensor = Variable(torch.LongTensor([all_artists.index(artist)]))
-    track_tensor = Variable(track)
-    return artist, track, artist_tensor, track_tensor
+    genre = randomChoice(all_genres)
+    song = randomChoice(genres[genre])
+    genre_tensor = Variable(torch.LongTensor([all_genres.index(genre)]))
+    song_tensor = Variable(song)
+    return genre, song, genre_tensor, song_tensor
 
 def randomChoice(l):
     return l[random.randint(0, len(l) - 1)]
 
 
-def combine_tracks(filename):
-    file = open(filename, 'r')
-
-    data = file.read()
-    name = file.name
-    newName = name[:name.rfind('.')] + "_combined" + name[name.rfind('.'):]
-    file.close()
-
-    jsonData = json.loads(data)
-
-    # combines all tracks from entire json
-    tracks = jsonData['tracks']
-    combined = tracks[0]
-    for track in tracks[1:]:
-        if track['duration'] > combined['duration']:
-            combined['duration'] = track['duration']
-        if track['id'] > combined['id']:
-            combined['id'] = track['id'] + 1
-        for note in track['notes']:
-            combined['notes'].append(note)
-        combined['length'] = len(combined['notes'])
-
-    print combined
-
-    # combined is now a single track containing all notes.
-    # This should work with fugue tracks too.
-    # This will probably break if we try to include instrumentation later
-    # jsonWrite = json.dumps(combined, indent=4)
-    # newFile = open(newName, 'w')
-    # newFile.write(jsonWrite)
-    # newFile.close()
-
-
-artist_tracks = get_hotones('../midi_data/train')
-all_artists = [key for key in artist_tracks]
+genres = {}
+all_genres = []
+base_dir = '../data'
+for folder in os.listdir(base_dir):
+    all_genres.append(folder)
+    genres[folder] = get_hotones(os.path.join(base_dir, folder))
+print 'got data'
 
 if __name__ == "__main__":
-    # midi_folder = sys.argv[1]
-    # artist_tracks = get_hotones('midi_data')
-    # all_artists = [key for key in artist_tracks]
-    # artist, track, artist_tensor, track_tensor = randomTrainingPair()
-    for file in os.listdir('../BaroqueJSON'):
-        if '.js' in file:
-            combine_tracks(os.path.join('../BaroqueJSON', file))
+    # midi_dir = sys.argv[1]
+    # genres = {}
+    # all_genres = []
+    # for folder in os.listdir(midi_dir):
+    #     all_genres.append(folder)
+    #     genres[folder] = get_hotones(os.path.join(midi_dir, folder))
+    genre, song, genre_tensor, song_tensor = randomTrainingPair()
+    print genre
