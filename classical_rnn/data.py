@@ -66,7 +66,7 @@ def combine_tracks(filename):
             combined['notes'].append(note)
         combined['length'] = len(combined['notes'])
 
-    print combined
+    print (combined)
 
     # combined is now a single track containing all notes.
     # This should work with fugue tracks too.
@@ -77,7 +77,7 @@ def combine_tracks(filename):
     # newFile.close()
 
 
-artist_tracks = get_hotones('../midi_data/train')
+artist_tracks = get_hotones('../BaroqueJSON')
 all_artists = [key for key in artist_tracks]
 
 if __name__ == "__main__":
