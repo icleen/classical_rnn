@@ -55,7 +55,7 @@ base_dir = '../data'
 for folder in os.listdir(base_dir):
     all_genres.append(folder)
     genres[folder] = get_hotones(os.path.join(base_dir, folder))
-print 'got data'
+print ('got data')
 
 if __name__ == "__main__":
     # midi_dir = sys.argv[1]
@@ -65,4 +65,4 @@ if __name__ == "__main__":
     #     all_genres.append(folder)
     #     genres[folder] = get_hotones(os.path.join(midi_dir, folder))
     genre, song, genre_tensor, song_tensor = randomTrainingPair()
-    print genre
+    print (genre)
