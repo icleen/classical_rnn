@@ -2,10 +2,8 @@ from model import *
 from data import *
 import sys
 
-rnn = torch.load('classical_music_classification.pt')
-
 # Just return an output given a line
-def evaluate(track_tensor):
+def evaluate(track_tensor, rnn):
     hidden = rnn.initHidden()
 
     for i in range(track_tensor.size()[0]):
@@ -22,12 +20,17 @@ def predict(track, n_predictions=2):
 
     for i in range(n_predictions):
         value = topv[0][i]
-        artist_index = topi[0][i]
-        print('(%.2f) %s' % (value, all_artists[artist_index]))
-        predictions.append([value, all_artists[artist_index]])
+        genre_index = topi[0][i]
+        print('(%.2f) %s' % (value, all_genres[genre_index]))
+        predictions.append([value, all_genres[genre_index]])
 
     return predictions
 
 if __name__ == '__main__':
+    if len(sys.argv) > 2:
+        rnn = torch.load(sys.argv[2])
+    else:
+        rnn = torch.load('classical_music_classification.pt')
+
     tensor = get_notes(sys.argv[1])
-    predict(tensor)
+    predict(tensor, rnn)
