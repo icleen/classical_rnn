@@ -37,10 +37,12 @@ def timeSince(since):
     return '%dm %ds' % (m, s)
 
 if __name__ == '__main__':
+    genres, all_genres = get_data()
+    
     n_epochs = 10000 # 10,000
-    learning_rate = 0.001 # If you set this too high, it might explode. If too low, it might not learn
+    learning_rate = 0.0005 # If you set this too high, it might explode. If too low, it might not learn
     n_hidden = 128
-    savefile = 'classical_music_classification_ten_lr001.pt'
+    savefile = 'classical_music_classification_ten_lr0005.pt'
     if len(sys.argv) > 1 and sys.argv[1] == '-R':
         rnn = torch.load(sys.argv[2])
         savefile = sys.argv[3]
