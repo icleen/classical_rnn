@@ -7,9 +7,13 @@ import torch
 import random
 from torch.autograd import Variable
 
+note_num = 30
+# note_range = 95
+note_range = 95 + 2 #added 2 for velocity and durations
+velocity = note_range - 2 #might be off by one errors
+duration = note_range - 1
+
 def get_notes(midi_file):
-    note_num = 30
-    note_range = 95
     with open(midi_file, 'r') as f:
         midi = json.load(f)
 
@@ -21,6 +25,8 @@ def get_notes(midi_file):
                 if note['time'] not in note:
                     times[note['time']] = torch.zeros(note_range)
                 times[note['time']][int(note['midi'])-24] += 1
+                times[note['time']][velocity] = note['velocity']
+                times[note['time']][duration] = note['duration']
 
     keylist = times.keys()
     keylist.sort()
@@ -59,7 +65,7 @@ def get_data(base_dir='../data'):
     with open('all_genres.json', 'w') as f:
         json.dump(all_genres, f)
     print ('got data')
-    return genres, all_genres
+    return genres, all_genres,
 
 def get_genres(filename='all_genres.json'):
     with open(filename, 'r') as f:
