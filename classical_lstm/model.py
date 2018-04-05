@@ -11,7 +11,7 @@ class LSTMclassifier(nn.Module):
         self.output_size = output_size
         self.num_layers = num_layers
 
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers)
+        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, dropout=0.5)
 
         # The linear layer that maps from hidden state space to tag space
         self.hidden2tag = nn.Linear(hidden_size, output_size)
