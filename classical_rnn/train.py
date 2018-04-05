@@ -36,7 +36,7 @@ def timeSince(since):
     return '%dm %ds' % (m, s)
 
 if __name__ == '__main__':
-    n_epochs = 10000 # 10,000
+    n_epochs = 10 # 10,000
     learning_rate = 0.001 # If you set this too high, it might explode. If too low, it might not learn
     n_hidden = 128
     savefile = 'classical_music_classification_ten_lr001.pt'
@@ -88,5 +88,5 @@ if __name__ == '__main__':
             current_loss = 0
 
     torch.save(rnn, savefile)
-    plt.plot(all_losses)
-    plt.show()
+    # plt.plot(all_losses)
+    # plt.show()

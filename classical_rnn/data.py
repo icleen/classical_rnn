@@ -7,7 +7,9 @@ import random
 from torch.autograd import Variable
 
 note_num = 30
-note_range = 95
+note_range = 95 + 2 #added 2 for velocity and durations
+velocity = 95 #might be off by one errors
+duration = 96 
 
 def get_notes(midi_file):
     with open(midi_file, 'r') as f:
@@ -21,9 +23,11 @@ def get_notes(midi_file):
                 if note['time'] not in note:
                     times[note['time']] = torch.zeros(note_range)
                 times[note['time']][int(note['midi'])-24] += 1
+                # times[note['time']][velocity] = note['velocity']
+                # times[note['time']][duration] = note['duration']
 
     keylist = times.keys()
-    keylist.sort()
+    sorted(keylist)
     tensor = torch.zeros(len(keylist), 1, note_range)
     # tensor = np.zeros((len(keylist), 1, note_range))
     for ki, key in enumerate(keylist):
