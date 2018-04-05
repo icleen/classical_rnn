@@ -62,8 +62,8 @@ def get_data(base_dir='../data'):
     for folder in os.listdir(base_dir):
         all_genres.append(folder)
         genres[folder] = get_hotones(os.path.join(base_dir, folder))
-    with open('all_genres.json', 'w') as f:
-        json.dump(all_genres, f)
+    # with open('all_genres.json', 'w') as f:
+    #     json.dump(all_genres, f)
     print ('got data')
     return genres, all_genres,
 
