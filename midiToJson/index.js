@@ -1,6 +1,7 @@
+console.log(process.argv[2]);
 const MidiParse = require("midiconvert");
 const fs = require('fs');
-var dir = "./B2";
+var dir = "./" + process.argv[2];
 var dirJson = dir + "JSON"
 if (!fs.existsSync(dirJson)){
     fs.mkdirSync(dirJson);
