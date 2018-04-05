@@ -14,14 +14,13 @@ def categoryFromOutput(output):
     return all_genres[category_i], category_i
 
 def train(genre_tensor, song_tensor):
-    hidden = rnn.initHidden()
-    optimizer.zero_grad()
+    rnn.zero_grad()
+    rnn.hidden = rnn.init_hidden()
 
     for i in range(song_tensor.size()[0]):
-        output, hidden = rnn(song_tensor[i], hidden)
+        output = rnn(song_tensor[i])
 
-    print (output)
-    loss = criterion(output, genre_tensor)
+    loss = loss_function(output, genre_tensor)
     loss.backward()
 
     optimizer.step()
@@ -37,10 +36,12 @@ def timeSince(since):
     return '%dm %ds' % (m, s)
 
 if __name__ == '__main__':
+    genres, all_genres = get_data()
+
     n_epochs = 10000 # 10,000
     learning_rate = 0.001 # If you set this too high, it might explode. If too low, it might not learn
     n_hidden = 128
-    savefile = 'classical_music_classification_ten_lr001.pt'
+    savefile = 'saves/classical_lstm_ten_lr001_h128.pt'
     if len(sys.argv) > 1 and sys.argv[1] == '-R':
         rnn = torch.load(sys.argv[2])
         savefile = sys.argv[3]
@@ -57,37 +58,53 @@ if __name__ == '__main__':
             savefile = sys.argv[3]
         if len(sys.argv) > 4:
             n_hidden = int(sys.argv[4])
-        rnn = RNN(note_range, n_hidden, len(all_genres))
+        rnn = LSTMclassifier(note_range, n_hidden, len(all_genres))
+
+    graphfile = savefile.split('/')[-1]
+    graphfile = 'graphs/' + graphfile.split('.')[0] + '.png'
 
     print_every = n_epochs / 100
-    plot_every = n_epochs / 10
+    # plot_every = n_epochs / 10
 
     # rnn = RNN(note_range, n_hidden, len(all_genres))
     optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
-    criterion = nn.NLLLoss()
+    loss_function = nn.NLLLoss()
 
     # Keep track of losses for plotting
-    current_loss = 0
+    cum_loss = 0.0
+    cum_acc = 0.0
+    # current_loss = 0.0
     all_losses = []
 
     start = time.time()
 
     for epoch in range(1, n_epochs + 1):
-        genre, song, genre_tensor, song_tensor = randomTrainingPair()
+        genre, song, genre_tensor, song_tensor = randomTrainingPair(genres, all_genres)
         output, loss = train(genre_tensor, song_tensor)
-        current_loss += loss
+        # current_loss += loss
+        cum_loss += loss
 
         # Print epoch number, loss, name and guess
         if epoch % print_every == 0:
             guess, guess_i = categoryFromOutput(output)
+            # cum_acc += 1 if guess == genre
             correct = 'c' if guess == genre else 'f (%s)' % genre
             print('%d %d%% (%s) %.4f / %s %s' % (epoch, epoch / n_epochs * 100, timeSince(start), loss, guess, correct))
+            print('Average Loss: %f' % (cum_loss / print_every))
+            # Add current loss avg to list of losses
+            all_losses.append(cum_loss / print_every)
+            cum_loss = 0.0
+            # cum_acc = 0.0
 
-        # Add current loss avg to list of losses
-        if epoch % plot_every == 0:
-            all_losses.append(current_loss / plot_every)
-            current_loss = 0
+
+
+        # if epoch % plot_every == 0:
+        #     all_losses.append(current_loss / plot_every)
+        #     current_loss = 0.0
 
     torch.save(rnn, savefile)
+    print (savefile)
     plt.plot(all_losses)
+    plt.savefig(graphfile)
+    print (graphfile)
     plt.show()
