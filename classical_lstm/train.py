@@ -58,22 +58,18 @@ if __name__ == '__main__':
             savefile = sys.argv[3]
         if len(sys.argv) > 4:
             n_hidden = int(sys.argv[4])
-        rnn = LSTMclassifier(note_range, n_hidden, len(all_genres))
+        rnn = LSTMclassifier(note_range, n_hidden, len(all_genres), 3)
 
     graphfile = savefile.split('/')[-1]
     graphfile = 'graphs/' + graphfile.split('.')[0] + '.png'
 
     print_every = n_epochs / 100
-    # plot_every = n_epochs / 10
 
-    # rnn = RNN(note_range, n_hidden, len(all_genres))
     optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
     loss_function = nn.NLLLoss()
 
     # Keep track of losses for plotting
     cum_loss = 0.0
-    cum_acc = 0.0
-    # current_loss = 0.0
     all_losses = []
 
     start = time.time()
@@ -81,26 +77,17 @@ if __name__ == '__main__':
     for epoch in range(1, n_epochs + 1):
         genre, song, genre_tensor, song_tensor = randomTrainingPair(genres, all_genres)
         output, loss = train(genre_tensor, song_tensor)
-        # current_loss += loss
         cum_loss += loss
 
         # Print epoch number, loss, name and guess
         if epoch % print_every == 0:
             guess, guess_i = categoryFromOutput(output)
-            # cum_acc += 1 if guess == genre
             correct = 'c' if guess == genre else 'f (%s)' % genre
             print('%d %d%% (%s) %.4f / %s %s' % (epoch, epoch / n_epochs * 100, timeSince(start), loss, guess, correct))
             print('Average Loss: %f' % (cum_loss / print_every))
             # Add current loss avg to list of losses
             all_losses.append(cum_loss / print_every)
             cum_loss = 0.0
-            # cum_acc = 0.0
-
-
-
-        # if epoch % plot_every == 0:
-        #     all_losses.append(current_loss / plot_every)
-        #     current_loss = 0.0
 
     torch.save(rnn, savefile)
     print (savefile)

@@ -38,7 +38,7 @@ def timeSince(since):
 
 if __name__ == '__main__':
     genres, all_genres = get_data()
-    
+
     n_epochs = 10000 # 10,000
     learning_rate = 0.0005 # If you set this too high, it might explode. If too low, it might not learn
     n_hidden = 128
@@ -62,14 +62,14 @@ if __name__ == '__main__':
         rnn = RNN(note_range, n_hidden, len(all_genres))
 
     print_every = n_epochs / 100
-    plot_every = n_epochs / 10
+    # plot_every = n_epochs / 10
 
     # rnn = RNN(note_range, n_hidden, len(all_genres))
     optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
     criterion = nn.NLLLoss()
 
     # Keep track of losses for plotting
-    current_loss = 0
+    cum_loss = 0
     all_losses = []
 
     start = time.time()
@@ -77,18 +77,21 @@ if __name__ == '__main__':
     for epoch in range(1, n_epochs + 1):
         genre, song, genre_tensor, song_tensor = randomTrainingPair()
         output, loss = train(genre_tensor, song_tensor)
-        current_loss += loss
+        cum_loss += loss
 
         # Print epoch number, loss, name and guess
         if epoch % print_every == 0:
             guess, guess_i = categoryFromOutput(output)
             correct = 'c' if guess == genre else 'f (%s)' % genre
             print('%d %d%% (%s) %.4f / %s %s' % (epoch, epoch / n_epochs * 100, timeSince(start), loss, guess, correct))
+            print('Average Loss: %f' % (cum_loss / print_every))
+            all_losses.append(cum_loss / print_every)
+            cum_loss = 0.0
 
         # Add current loss avg to list of losses
-        if epoch % plot_every == 0:
-            all_losses.append(current_loss / plot_every)
-            current_loss = 0
+        # if epoch % plot_every == 0:
+        #     all_losses.append(current_loss / plot_every)
+        #     current_loss = 0
 
     torch.save(rnn, savefile)
     plt.plot(all_losses)

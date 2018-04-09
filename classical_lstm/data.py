@@ -7,7 +7,7 @@ import torch
 import random
 from torch.autograd import Variable
 
-note_num = 30
+note_num = 60
 # note_range = 95
 note_range = 95 + 2 #added 2 for velocity and durations
 velocity = note_range - 2 #might be off by one errors
@@ -30,12 +30,14 @@ def get_notes(midi_file):
 
     keylist = times.keys()
     keylist.sort()
-    # tensor = torch.zeros(len(keylist), 1, note_range)
-    # for ki, key in enumerate(keylist):
-    #     tensor[ki][0] += times[key]
-    tensor = torch.zeros(note_num, 1, note_range)
-    for ni in range(note_num):
-        tensor[ni][0] += times[keylist[ni]]
+    if note_num < len(keylist):
+        tensor = torch.zeros(note_num, 1, note_range)
+        for ni in range(note_num):
+            tensor[ni][0] += times[keylist[ni]]
+    else:
+        tensor = torch.zeros(len(keylist), 1, note_range)
+        for ki, key in enumerate(keylist):
+            tensor[ki][0] += times[key]
     return tensor
 
 def get_hotones(folder):
