@@ -7,7 +7,7 @@ import torch
 import random
 from torch.autograd import Variable
 
-note_num = 60
+note_num = 30
 # note_range = 95
 note_range = 95 + 2 #added 2 for velocity and durations
 velocity = note_range - 2 #might be off by one errors

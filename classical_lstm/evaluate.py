@@ -24,6 +24,7 @@ def eval_set(weight_file, test_dir=None):
     confusion = np.zeros((len(all_genres), len(all_genres)))
     correct = 0
     total_correct = 0
+    weighted_acc = 0.0
     count = 0
     for g, gen in enumerate(all_genres):
         count += len(genres[gen])
@@ -36,10 +37,12 @@ def eval_set(weight_file, test_dir=None):
                 total_correct += 1
         if len(genres[gen]) > 0:
             print('{} Accuracy: {}'.format(gen, float(correct) / len(genres[gen])))
+            weighted_acc += float(correct) / len(genres[gen])
             correct = 0
             confusion[g] /= np.sum(confusion[g])
 
     print('Total Accuracy: {}'.format(float(total_correct) / count))
+    print('Total Weighted Accuracy: {}'.format(weighted_acc / len(all_genres)))
     plt.imshow(confusion, interpolation='nearest', cmap=plt.cm.Blues)
     plt.title('Confusion Matrix')
     plt.colorbar()
@@ -50,7 +53,7 @@ def eval_set(weight_file, test_dir=None):
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
     graphfile = weight_file.split('/')[-1]
-    graphfile = 'graphs/confusion_' + graphfile.split('.')[0] + '.png'
+    graphfile = 'confusions/confusion_' + graphfile.split('.')[0] + '.png'
     plt.savefig(graphfile)
     print('Saved Figure: {}'.format(graphfile))
 

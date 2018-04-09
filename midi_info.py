@@ -1,6 +1,8 @@
 import json
 import torch
 import numpy as np
+import sys
+import os
 
 def get_midi(file_name):
     with open(file_name, 'r') as f:
@@ -26,6 +28,15 @@ def print_info(arr):
             print 'duration: ' + str(t['duration'])
         if 'notes' in t:
             print 'notes: ' + str(len(t['notes']))
+        print '-----------------------------'
+
+def count_instruments(instr, arr):
+    for t in arr:
+        if 'instrument' in t:
+            if t['instrument'] not in instr:
+                instr[t['instrument']] = 0
+            instr[t['instrument']] += 1
+    return instr
 
 def get_notes(midi_file):
     note_num = 30
@@ -40,9 +51,19 @@ def get_notes(midi_file):
         tensor[ni][0][mnotes[ni]] = 1
     return tensor
 
-# midi = get_midi('midi_data/train/chpn_op10_e01.js')
-# tracks = get_tracks(midi)
-# print_info(tracks)
+
+folder = sys.argv[1]
+instr = {}
+for f in os.listdir(folder):
+    if '.json' in f:
+        midi = get_midi(os.path.join(folder,f))
+        # print '-------------One_File----------------'
+        tracks = get_tracks(midi)
+        instr = count_instruments(instr, tracks)
+        # print_info(tracks)
+
+for key in instr:
+    print 'Instrument: {}, Frequency: {}'.format(key, instr[key])
 # print len(tracks)
 # print tracks[1]['name']
 # print tracks[1]['instrument']
@@ -57,6 +78,6 @@ def get_notes(midi_file):
 # print tracks[2]['notes'][4]
 # print tracks[2]['notes'][5]
 
-tensor = get_notes('midi_data/train/bach_846.js')
-print tensor[0].numpy()
-print tensor[1].numpy()
+# tensor = get_notes('midi_data/train/bach_846.js')
+# print tensor[0].numpy()
+# print tensor[1].numpy()
